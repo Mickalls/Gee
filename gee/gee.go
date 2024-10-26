@@ -8,18 +8,18 @@ type HandlerFunc func(*Context)
 
 // Engine 结构体实现 HandlerFunc 接口
 type Engine struct {
-	router *router
+	router *Router
 }
 
 // New 是 gee.Engine 的初始化函数
 func New() *Engine {
 	return &Engine{
-		router: newRouter(),
+		router: NewRouter(),
 	}
 }
 
 func (engine *Engine) addRoute(method string, pattern string, handler HandlerFunc) {
-	engine.router.addRoute(method, pattern, handler)
+	engine.router.AddRoute(method, pattern, handler)
 }
 
 // GET 代表HTTP GET请求
