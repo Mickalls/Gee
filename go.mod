@@ -2,4 +2,4 @@ module Gee
 
 go 1.23.0
 
-replace gee v0.0.0 => ./gee
+replace Gee v0.0.0 => ./Gee
