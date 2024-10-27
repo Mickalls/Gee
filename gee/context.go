@@ -3,6 +3,7 @@ package gee
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 )
 
@@ -18,6 +19,9 @@ type Context struct {
 	Params map[string]string
 	// 响应状态
 	StatusCode int
+	// 中间件
+	handlers []HandlerFunc
+	index    int
 }
 
 func (c *Context) Param(key string) string {
@@ -31,7 +35,22 @@ func newContext(w http.ResponseWriter, req *http.Request) *Context {
 		Req:    req,
 		Path:   req.URL.Path,
 		Method: req.Method,
+		index:  -1,
 	}
+}
+
+func (c *Context) Next() {
+	log.Println("[do Next()]")
+	c.index++
+	s := len(c.handlers)
+	for ; c.index < s; c.index++ {
+		c.handlers[c.index](c)
+	}
+}
+
+func (c *Context) Fail(code int, err string) {
+	c.index = len(c.handlers)
+	c.JSON(code, H{"message": err})
 }
 
 // PostForm 查询 Post 请求的参数值

@@ -52,13 +52,17 @@ func (r *Router) GetRoute(method string, path string) (*trieNode, map[string]str
 
 func (r *Router) handle(c *Context) {
 	n, params := r.GetRoute(c.Method, c.Path)
-	if n == nil {
-		c.String(http.StatusNotFound, "404 Not Found: %s\n", c.Path)
-		return
+	if n != nil {
+		key := c.Method + "-" + n.Pattern
+		c.Params = params
+		// 将原本路由对应的handler放在中间件的最后面
+		c.handlers = append(c.handlers, r.handlers[key])
+	} else {
+		c.handlers = append(c.handlers, func(c *Context) {
+			c.String(http.StatusNotFound, "404 Not Found: %s\n", c.Path)
+		})
 	}
-	c.Params = params
-	key := c.Method + "-" + n.Pattern
-	r.handlers[key](c)
+	c.Next()
 }
 
 func ParsePattern(pattern string) []string {
